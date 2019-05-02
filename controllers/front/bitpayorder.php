@@ -55,11 +55,10 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
         $this->context->smarty->assign([
             'params' => $_REQUEST,
         ]);
-        error_log('--------');
-        error_log(print_r($cart,true));
-       
+     
 
-        //$this->setTemplate('payment_return.tpl');
+       
+       
         $this->setTemplate('module:bitpaycheckout/views/templates/front/payment_return.tpl');
 
 
@@ -72,8 +71,68 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
          $mailVars = array(
             
          );
+          #load BP classess
+         $level = 2;
+         include(dirname(__DIR__, $level)."/BitPayLib/BPC_Client.php");
+         include(dirname(__DIR__, $level)."/BitPayLib/BPC_Configuration.php");
+         include(dirname(__DIR__, $level)."/BitPayLib/BPC_Invoice.php");
+         include(dirname(__DIR__, $level)."/BitPayLib/BPC_Item.php");     
 
-         #$this->module->validateOrder($cart->id, Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key);
-         Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart->id.'&id_module='.$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
+         #BITPAY SPECIFIC INFO
+        
+      
+         $env = 'test';
+         $bitpay_token = Configuration::get('bitpay_checkout_token_dev');
+         
+        if (Configuration::get('bitpay_checkout_endpoint') == 1):
+            $env = 'production';
+            $bitpay_token = get_option('bitpay_checkout_token_prod');
+        endif;
+        global $cookie;
+        $module = Module::getInstanceByName('bitpaycheckout');
+        $version = $module->version;
+       
+        $currency = new CurrencyCore($cookie->id_currency);
+        $config = new BPC_Configuration($bitpay_token, $env);
+        $params = new stdClass();
+       
+        $params->fullNotifications = 'true';
+        $params->extension_version = 'BitPayCheckout_PrestaShop_'.$version;
+        $params->price = (float)$cart->getOrderTotal(true, Cart::BOTH);
+        $params->currency = $currency->iso_code;
+        $params->orderId = trim($cart->id);
+
+        $params->extendedNotifications = true;
+        $params->transactionSpeed = 'medium';
+        $params->acceptanceWindow = 1200000;
+
+        $item = new BPC_Item($config, $params);
+        $invoice = new BPC_Invoice($item);
+        //this creates the invoice with all of the config params from the item
+        $invoice->BPC_createInvoice();
+        $invoiceData = json_decode($invoice->BPC_getInvoiceData());
+        die();
+
+         #$current_user = wp_get_current_user();
+        /*
+        if ($bitpay_checkout_options['bitpay_checkout_capture_email'] == 1):
+            $current_user = wp_get_current_user();
+
+            if ($current_user->user_email):
+                $buyerInfo = new stdClass();
+                $buyerInfo->name = $current_user->display_name;
+                $buyerInfo->email = $current_user->user_email;
+                $params->buyer = $buyerInfo;
+            endif;
+        endif;
+        */
+
+            //orderid
+            
+
+
+        die();
+       # $this->module->validateOrder($cart->id, Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key);
+         #Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart->id.'&id_module='.$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
     }
 }

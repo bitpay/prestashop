@@ -251,11 +251,7 @@ class BitpayCheckout extends PaymentModule
 
     public function hookDisplayHeader()
     {
-        echo '<script type = "text/javascript" src = "//bitpay.com/bitpay.min.js" ></script>';
-        
-    
-    $this->context->controller->addJS($this->_path.'js/bitpay_ps.js');
-    #$this->context->controller->addJS('//bitpay.com/bitpay.min.js');
+       $this->context->controller->addJS($this->_path.'js/bitpay_ps.js');
     }
 
     public function hookPaymentOptions($params)
