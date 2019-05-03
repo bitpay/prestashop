@@ -136,7 +136,7 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
             #wp_redirect($invoice->BPC_getInvoiceURL());
         else:
            #modal
-            $this->module->validateOrder($cart->id, Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key);
+           # $this->module->validateOrder($cart->id, Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key);
             $orderId = (int)$this->module->currentOrder;
 
             $config = new BPC_Configuration($bitpay_token, $env);
@@ -151,7 +151,15 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
             $params->extendedNotifications = true;
             $params->transactionSpeed = 'medium';
             $params->acceptanceWindow = 1200000;
-        
+
+            if(Configuration::get('bitpay_checkout_capture_email') == 1)
+                if ($customer->email):
+                    $buyerInfo = new stdClass();
+                    $buyerInfo->name = $customer->firstname.' '.$customer->lastname;
+                    $buyerInfo->email = $customer->email;
+                    $params->buyer = $buyerInfo;
+                endif;
+            endif;
 
             $item = new BPC_Item($config, $params);
             $invoice = new BPC_Invoice($item);
@@ -185,29 +193,5 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
            
 
         endif;
-
-       
-
-         #$current_user = wp_get_current_user();
-        /*
-        if ($bitpay_checkout_options['bitpay_checkout_capture_email'] == 1):
-            $current_user = wp_get_current_user();
-
-            if ($current_user->user_email):
-                $buyerInfo = new stdClass();
-                $buyerInfo->name = $current_user->display_name;
-                $buyerInfo->email = $current_user->user_email;
-                $params->buyer = $buyerInfo;
-            endif;
-        endif;
-        */
-
-            //orderid
-            
-
-
-        #die();
-       # $this->module->validateOrder($cart->id, Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key);
-         #Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart->id.'&id_module='.$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
     }
 }
