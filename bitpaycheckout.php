@@ -58,7 +58,7 @@ class BitpayCheckout extends PaymentModule
         parent::__construct();
 
         $this->displayName = $this->l('BitPay Checkout');
-        $this->description = $this->l('Description of BitPay Checkout');
+        $this->description = $this->l('Accepts Bitcoin payments via BitPay.');
         $this->confirmUninstall = $this->l('Are you sure you want to delete your details?');
 
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
@@ -240,11 +240,31 @@ class BitpayCheckout extends PaymentModule
             return false;
         }
         $this->registerHook('displayHeader');
+
+        $table_name = '_bitpay_checkout_transactions';
+
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name(
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `order_id` int(11) NOT NULL,
+        `transaction_id` varchar(255) NOT NULL,
+        `customer_key` varchar(255) NOT NULL,
+        `transaction_status` varchar(50) NOT NULL DEFAULT 'new',
+        `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`id`)
+        )";
+        $db = Db::getInstance();
+        $db->Execute($sql);
+
         
         return true;
     }
 
     public function uninstall() {
+        $table_name = '_bitpay_checkout_transactions';
+        $sql = "DROP TABLE $table_name";
+        $db = Db::getInstance();
+        $db->Execute($sql);
+
         #Configuration::deleteByName('bitpay_APIKEY');
         return parent::uninstall();
       }
