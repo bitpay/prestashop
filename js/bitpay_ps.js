@@ -33,22 +33,43 @@ function showModal(){
         if(getCookie('env')=='test'){
             bitpay.enableTestMode()
         }
+        var parts = window.location.search.substr(1).split("&");
+        var $_GET = {};
+        for (var i = 0; i < parts.length; i++) {
+            var temp = parts[i].split("=");
+            $_GET[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+        }
+        $customerKey = $_GET['key']
+        $cid = $_GET['cid']
+        $api = window.location.origin + '/module/bitpaycheckout/bitpayorder'
+        $cart = window.location.origin + '/cart?action=show'
         bitpay.showInvoice(getCookie('invoiceID')); 
 
         bitpay.onModalWillLeave(function() {
-            console.log('is_paid',is_paid)
             if (is_paid == true) {
                 jQuery("#main").css('opacity','1')
+                //delete the saved cart
+                var $dataObj = {
+                    action: 's',
+                    cid: $cid,
+                   
+                }
+                var saveData = jQuery.ajax({
+                    type: 'POST',
+                    url: $api,
+                    data: $dataObj,
+                    dataType: "text",
+                    success: function(resultData) {
+                        deleteCookie('invoiceID')
+                        deleteCookie('oID')
+                        location.reload()
+                    }
+                });
+
+
             } else {
                 //we need the customer key
-                var parts = window.location.search.substr(1).split("&");
-                var $_GET = {};
-                for (var i = 0; i < parts.length; i++) {
-                    var temp = parts[i].split("=");
-                    $_GET[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
-                }
-                $customerKey = $_GET['key']
-                $api = window.location.origin + '/module/bitpaycheckout/bitpayorder'
+                
                 var $dataObj = {
                     action: 'd',
                     orderid: getCookie('oID'),
@@ -62,9 +83,10 @@ function showModal(){
                     data: $dataObj,
                     dataType: "text",
                     success: function(resultData) {
+                        console.log('aaaaa')
                         deleteCookie('invoiceID')
                         deleteCookie('oID')
-                      //  window.location = redirect;
+                        window.location = $cart;
                     }
                 });
             }
