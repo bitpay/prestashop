@@ -137,13 +137,7 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
         $version = $module->version;
 
         $currency = new CurrencyCore($cookie->id_currency);
-        $use_modal = Configuration::get('bitpay_checkout_flow');
-        #modal
-        if ($use_modal == 0):
-            #redirect
-            #wp_redirect($invoice->BPC_getInvoiceURL());
-        else:
-            #modal
+        
             $this->module->validateOrder($cart->id, Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, null, $mailVars, (int) $currency->id, false, $customer->secure_key);
             $orderId = (int) $this->module->currentOrder;
 
@@ -159,6 +153,8 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
             $params->extendedNotifications = true;
             $params->transactionSpeed = 'medium';
             $params->acceptanceWindow = 1200000;
+            #redirect
+            $params->redirectURL = _PS_BASE_URL_.__PS_BASE_URI__.'index.php?controller=order-detail&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key;
 
             if (Configuration::get('bitpay_checkout_capture_email') == 1):
                 if ($customer->email):
@@ -175,10 +171,6 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
             $invoice->BPC_createInvoice();
             $invoiceData = json_decode($invoice->BPC_getInvoiceData());
             $invoiceID = $invoiceData->data->id;
-
-            setcookie('invoiceID', $invoiceID, time() + (86400 * 30), "/"); // 86400 = 1 day
-            setcookie('oID', $orderId, time() + (86400 * 30), "/"); // 86400 = 1 day
-            setcookie('env', $env, time() + (86400 * 30), "/"); // 86400 = 1 day
 
             $bitpay_table_name = '_bitpay_checkout_transactions';
             $bp_sql = "INSERT INTO $bitpay_table_name (order_id,transaction_id,customer_key) VALUES ($orderId,'$invoiceID','$customer->secure_key')";
@@ -197,8 +189,19 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
             $db->Execute($bp_u);
 
             #Tools::redirect('index.php?controller=order-detail&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
+            $use_modal = Configuration::get('bitpay_checkout_flow');
+            #modal
+            if ($use_modal == 0):
+                Tools::redirect($invoice->BPC_getInvoiceURL());
+                #redirect
+                #wp_redirect($invoice->BPC_getInvoiceURL());
+            else:
+            #modal
 
             #lets restore the cart just in case
+            setcookie('invoiceID', $invoiceID, time() + (86400 * 30), "/"); // 86400 = 1 day
+            setcookie('oID', $orderId, time() + (86400 * 30), "/"); // 86400 = 1 day
+            setcookie('env', $env, time() + (86400 * 30), "/"); // 86400 = 1 day
 
             $id_cart = $this->getCartInfo($orderId);
 
@@ -210,10 +213,11 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
             $context->cart = $duplication['cart'];
             CartRule::autoAddToCart($context);
             $this->context->cookie->write();
+            
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key.'&cid='.$cart->id_customer);
+            endif;
 
-        endif;
     }
     public function getCartInfo($orderid)
     {
