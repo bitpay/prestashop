@@ -83,7 +83,6 @@ function showModal(){
                     data: $dataObj,
                     dataType: "text",
                     success: function(resultData) {
-                        console.log('aaaaa')
                         deleteCookie('invoiceID')
                         deleteCookie('oID')
                         window.location = $cart;
