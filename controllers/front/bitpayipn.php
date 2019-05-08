@@ -1,8 +1,8 @@
 <?php
 if (isset($_POST)):
     $all_data = json_decode(file_get_contents("php://input"), true);
-    #print_r($all_data);
-    #
+    $db_prefix = _DB_PREFIX_;
+
     $data = $all_data['data'];
     $event = $all_data['event'];
     $orderId = $data['orderId'];
@@ -10,8 +10,8 @@ if (isset($_POST)):
     $transaction_status = $event['name'];
 
     $table_name = '_bitpay_checkout_transactions';
-    $order_table = 'ps_orders';
-    $order_history_table = 'ps_order_history';
+    $order_table = $db_prefix.'orders';
+    $order_history_table = $db_prefix.'order_history';
 
     $bp_sql = "SELECT * FROM $table_name WHERE transaction_id = '$transaction_id'";
     $results = Db::getInstance()->executes($bp_sql);

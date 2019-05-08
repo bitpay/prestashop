@@ -30,17 +30,18 @@
 extract($_POST);
 if (isset($action) && $action == 's'):
     #this will delete the tempcart
-    $cart_table = 'ps_cart';
+    $db_prefix = _DB_PREFIX_;
+    $cart_table = $db_prefix.'part';
     $cart_sql = "DELETE FROM $cart_table WHERE id_customer = $cid";
     $db = Db::getInstance();
     $db->Execute($cart_sql);
     exit();
 
 elseif (isset($action) && $action == 'd'):
-
+    $db_prefix = _DB_PREFIX_;
     $bitpay_table_name = '_bitpay_checkout_transactions';
-    $order_table = 'ps_orders';
-    $order_history_table = 'ps_order_history';
+    $order_table = $db_prefix.'orders';
+    $order_history_table = $db_prefix.'order_history';
 
     $bp_sql = "SELECT * FROM $bitpay_table_name WHERE order_id = $orderid AND transaction_id = '$invoiceID' AND customer_key = '$customerKey'";
     $results = Db::getInstance()->executes($bp_sql);
@@ -175,12 +176,14 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
         $db = Db::getInstance();
         $db->Execute($bp_sql);
 
-        $order_table = 'ps_orders';
+        $db_prefix = _DB_PREFIX_;
+
+        $order_table = $db_prefix.'orders';
         $bp_u = "UPDATE $order_table SET current_state = 3 WHERE id_order = '$orderId' AND secure_key = '$customer->secure_key'";
         $db = Db::getInstance();
         $db->Execute($bp_u);
 
-        $order_history_table = 'ps_order_history';
+        $order_history_table = $db_prefix.'order_history';
         $bp_u = "INSERT INTO $order_history_table (id_employee,id_order,id_order_state,date_add)
 					            VALUES (0,'$orderId',3,NOW())";
         $db = Db::getInstance();
@@ -215,7 +218,8 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
     }
     public function getCartInfo($orderid)
     {
-        $order_table = 'ps_orders';
+        $db_prefix = _DB_PREFIX_;
+        $order_table = $db_prefix.'orders';
         $bp_sql = "SELECT * FROM $order_table WHERE id_order = $orderid LIMIT 1";
         $results = Db::getInstance()->executes($bp_sql);
         if (count($results) == 1):
