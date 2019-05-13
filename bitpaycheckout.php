@@ -241,6 +241,9 @@ class BitpayCheckout extends PaymentModule
         }
         $this->registerHook('displayHeader');
 
+        #api endpoints
+        $this->registerHook('moduleRoutes');
+
         $table_name = '_bitpay_checkout_transactions';
 
         $sql = "CREATE TABLE IF NOT EXISTS $table_name(
@@ -257,6 +260,29 @@ class BitpayCheckout extends PaymentModule
 
         
         return true;
+    }
+    public function hookModuleRoutes()
+    {
+        return [
+            'module-bitpaycheckout-ipn' => [
+                'rule' => 'bitpaycheckout/ipn',
+                'keywords' => [],
+                'controller' => 'ipn',
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'bitpaycheckout'
+                ] 
+                ],
+                'module-bitpaycheckout-cartfix' => [
+                    'rule' => 'bitpaycheckout/cartfix',
+                    'keywords' => [],
+                    'controller' => 'cartfix',
+                    'params' => [
+                        'fc' => 'module',
+                        'module' => 'bitpaycheckout'
+                    ] 
+                ]                
+        ];
     }
 
     public function uninstall() {

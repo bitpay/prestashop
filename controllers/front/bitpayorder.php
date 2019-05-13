@@ -68,6 +68,9 @@ function deleteOrder($orderid, $invoiceID, $bitpay_table_name, $order_table, $or
     $bp_d = "DELETE FROM $order_history_table WHERE id_order = '$orderid'";
     $db = Db::getInstance();
     $db->Execute($bp_d);
+
+            
+
     return true;
 
 }
@@ -200,17 +203,7 @@ class BitpayCheckoutBitpayorderModuleFrontController extends ModuleFrontControll
             setcookie('invoiceID', $invoiceID, time() + (86400 * 30), "/"); // 86400 = 1 day
             setcookie('oID', $orderId, time() + (86400 * 30), "/"); // 86400 = 1 day
             setcookie('env', $env, time() + (86400 * 30), "/"); // 86400 = 1 day
-
-            $id_cart = $this->getCartInfo($orderId);
-
-            $oldCart = new Cart($id_cart);
-            $duplication = $oldCart->duplicate();
-            $this->context->cart = new Cart($id_cart);
-            $this->context->cookie->id_cart = $duplication['cart']->id;
-            $context = $this->context;
-            $context->cart = $duplication['cart'];
-            CartRule::autoAddToCart($context);
-            $this->context->cookie->write();
+            
 
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key . '&cid=' . $cart->id_customer);
         endif;

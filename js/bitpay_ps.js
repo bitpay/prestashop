@@ -43,6 +43,7 @@ function showModal(){
         $cid = $_GET['cid']
         $api = window.location.origin + '/module/bitpaycheckout/bitpayorder'
         $cart = window.location.origin + '/cart?action=show'
+        $cartfix = window.location.origin + '/module/bitpaycheckout/cartfix'
         bitpay.showInvoice(getCookie('invoiceID')); 
 
         bitpay.onModalWillLeave(function() {
@@ -62,7 +63,7 @@ function showModal(){
                     success: function(resultData) {
                         deleteCookie('invoiceID')
                         deleteCookie('oID')
-                        location.reload()
+                        
                     }
                 });
 
@@ -71,7 +72,7 @@ function showModal(){
                 //we need the customer key
                 
                 var $dataObj = {
-                    action: 'd',
+                    bpaction: 'd',
                     orderid: getCookie('oID'),
                     invoiceID: getCookie('invoiceID'),
                     customerKey:$customerKey
@@ -79,7 +80,7 @@ function showModal(){
                
                 var saveData = jQuery.ajax({
                     type: 'POST',
-                    url: $api,
+                    url: $cartfix,
                     data: $dataObj,
                     dataType: "text",
                     success: function(resultData) {
@@ -114,50 +115,4 @@ function getCookie(cname) {
         }
     }
     return "";
-}
-
-
-
-
-function showModal2(){
-    console.log('env')
-    
-    
-    /*
-    setTimeout(function(){ 
-        $j(".main").css('opacity','0.3')
-
-    jQuery.post( "/showmodal/index/modal", function(data ) {
-    jQuery("#bitpaybtn").prop("disabled",true)
-       var is_paid = false
-       console.log('data',data)
-       var response = JSON.parse(data)
-        window.addEventListener("message", function (event) {
-            payment_status = event.data.status;
-            if (payment_status == "paid") {
-                is_paid = true
-                window.location.href =response.redirectURL;
-                return;
-            } 
-        }, false);
-            
-            //hide the order info
-            bitpay.onModalWillEnter(function () {
-                $j(".main").css('opacity','0.3')
-            });
-            //show the order info
-            bitpay.onModalWillLeave(function () {
-                if (is_paid == false) {
-                  window.location.href = response.cartFix;
-                } //endif
-            });
-            //show the modal
-            if(env == 'test'){
-            bitpay.enableTestMode()
-            }
-            setTimeout(function(){ bitpay.showInvoice(response.invoiceID); }, 10);
-            
-      });
-    }, 1000);
-    */
 }
