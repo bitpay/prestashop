@@ -23,7 +23,7 @@ class BitpayCheckoutCartfixModuleFrontController extends AbstractRestController
             $cart_sql = "DELETE FROM $cart_table WHERE id_customer = $cid";
             $db = Db::getInstance();
             $db->Execute($cart_sql);
-            exit();
+        exit();
 
         elseif (isset($bpaction) && $bpaction == 'd'):
             $db_prefix = _DB_PREFIX_;
@@ -38,7 +38,7 @@ class BitpayCheckoutCartfixModuleFrontController extends AbstractRestController
                 $this->deleteBitPayOrder($orderid, $invoiceID, $bitpay_table_name, $order_table, $order_history_table);
                 exit();
             endif;
-            die();
+        exit();
         endif;
         
 

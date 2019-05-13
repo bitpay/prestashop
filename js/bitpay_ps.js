@@ -41,9 +41,8 @@ function showModal(){
         }
         $customerKey = $_GET['key']
         $cid = $_GET['cid']
-        $api = window.location.origin + '/module/bitpaycheckout/bitpayorder'
+        $api = window.location.origin + '/module/bitpaycheckout/cartfix'
         $cart = window.location.origin + '/cart?action=show'
-        $cartfix = window.location.origin + '/module/bitpaycheckout/cartfix'
         bitpay.showInvoice(getCookie('invoiceID')); 
 
         bitpay.onModalWillLeave(function() {
@@ -51,7 +50,7 @@ function showModal(){
                 jQuery("#main").css('opacity','1')
                 //delete the saved cart
                 var $dataObj = {
-                    action: 's',
+                    bpaction: 's',
                     cid: $cid,
                    
                 }
@@ -80,7 +79,7 @@ function showModal(){
                
                 var saveData = jQuery.ajax({
                     type: 'POST',
-                    url: $cartfix,
+                    url: $api,
                     data: $dataObj,
                     dataType: "text",
                     success: function(resultData) {
